@@ -1,0 +1,437 @@
+/**
+ * BuddyPress Page-like Groups Styles
+ * Version: 1.0.0
+ */
+
+/* Page Mode Settings Section - Frontend & Backend */
+.bp-page-mode-settings {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.bp-page-mode-legend {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #23282d;
+}
+
+.page-mode-description {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #e5e5e5;
+}
+
+.page-mode-description p {
+    margin: 0 0 10px 0;
+}
+
+.page-mode-description p:last-child {
+    margin-bottom: 0;
+}
+
+.page-mode-main-toggle {
+    display: block;
+    font-size: 15px;
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+.page-mode-main-toggle input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.page-mode-options-container {
+    margin-left: 25px;
+    margin-top: 20px;
+}
+
+.page-mode-section {
+    background: #fff;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 3px;
+    border: 1px solid #e5e5e5;
+}
+
+.page-mode-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.page-mode-section label {
+    display: block;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.page-mode-section label:last-child {
+    margin-bottom: 0;
+}
+
+.page-mode-section input[type="radio"],
+.page-mode-section input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.page-mode-section .description {
+    display: block;
+    margin-top: 5px;
+    margin-left: 24px;
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+/* Page Mode Badge */
+.bp-page-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    margin-left: 10px;
+    background: #0073aa;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 3px;
+}
+
+.bp-page-mode-badge .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Member Actions */
+.bp-page-mode-member-actions {
+    margin: 20px 0;
+}
+
+.member-discussion-prompt {
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    margin-top: 15px;
+    border: 1px solid #e5e5e5;
+}
+
+.member-discussion-prompt p {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #555;
+}
+
+.member-discussion-prompt .button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #0073aa;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.member-discussion-prompt .button:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+/* Engagement Stats */
+.page-engagement-stats {
+    display: inline-flex;
+    gap: 15px;
+    margin-left: 15px;
+    color: #666;
+    font-size: 13px;
+}
+
+.page-engagement-stats span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.page-engagement-stats .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Quick Comment Buttons */
+.quick-comment-buttons {
+    display: inline-flex !important;
+    gap: 8px;
+    margin-left: 15px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    vertical-align: middle;
+}
+
+/* Ensure visibility in activity meta area */
+.activity-meta .quick-comment-buttons,
+.acomment-options .quick-comment-buttons {
+    display: inline-flex !important;
+    margin: 0 10px;
+}
+
+/* Fallback positioning */
+.bp-plg-activity-buttons-fallback,
+.bp-plg-activity-buttons-legacy {
+    margin: 10px 0;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+}
+
+/* Make buttons visible in different contexts */
+.activity-content .quick-comment-buttons,
+.activity-inner .quick-comment-buttons,
+.activity-header .quick-comment-buttons {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.quick-comment-buttons button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    background: #f7f7f7;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    color: #555;
+    font-family: inherit;
+}
+
+.quick-comment-buttons button:hover {
+    background: #fff;
+    border-color: #999;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.quick-comment-buttons button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.quick-comment-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.quick-comment-buttons button.loading {
+    color: #999;
+}
+
+.quick-comment-buttons button .emoji {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.quick-comment-buttons button .text {
+    font-weight: 500;
+}
+
+/* Quick comment button focus state */
+.quick-comment-buttons button:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: 2px;
+}
+
+/* Different button hover styles */
+.quick-comment-buttons button[data-comment="👍"]:hover {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+.quick-comment-buttons button[data-comment="❤️"]:hover {
+    background-color: #fce4ec;
+    border-color: #e91e63;
+    color: #e91e63;
+}
+
+.quick-comment-buttons button[data-comment="🙏"]:hover {
+    background-color: #f3e5f5;
+    border-color: #9c27b0;
+    color: #9c27b0;
+}
+
+/* Feedback styles */
+.quick-comment-feedback {
+    position: absolute;
+    top: -25px;
+    right: 50%;
+    transform: translateX(50%);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    pointer-events: none;
+    animation: feedbackPulse 0.3s ease;
+}
+
+.quick-comment-feedback.feedback-success {
+    background: #46b450;
+    color: #fff;
+}
+
+.quick-comment-feedback.feedback-error {
+    background: #dc3232;
+    color: #fff;
+}
+
+@keyframes feedbackPulse {
+    0% {
+        opacity: 0;
+        transform: translateX(50%) translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(50%) translateY(0);
+    }
+}
+
+/* Loading state */
+.quick-comment-buttons button.loading::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #999;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Activity comments loading */
+.activity-comments.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Ensure quick comments look good in activity stream */
+.activity-list .activity-content .activity-inner .quick-comment-buttons {
+    margin-top: 10px;
+    margin-left: 0;
+}
+
+/* Style for emoji comments in the comment list */
+.activity-comments .acomment-content {
+    min-height: auto;
+}
+
+.activity-comments .acomment-content p {
+    margin: 0;
+}
+
+/* Large emoji display for quick reactions */
+.activity-comments .acomment-content p:has(> span:only-child) {
+    font-size: 24px;
+    line-height: 1;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .quick-comment-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .page-engagement-stats {
+        margin-left: 0;
+        font-size: 12px;
+    }
+    
+    .quick-comment-buttons button .text {
+        display: none;
+    }
+    
+    .quick-comment-buttons button {
+        padding: 8px;
+        min-width: 40px;
+        justify-content: center;
+    }
+    
+    .page-mode-options-container {
+        margin-left: 0;
+    }
+    
+    .page-mode-section {
+        padding: 12px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .quick-comment-buttons button {
+        background: #2c2c2c;
+        border-color: #444;
+        color: #ccc;
+    }
+    
+    .quick-comment-buttons button:hover {
+        background: #333;
+        border-color: #666;
+    }
+    
+    .page-mode-description,
+    .page-mode-section {
+        background: #2c2c2c;
+        color: #ccc;
+        border-color: #444;
+    }
+    
+    .bp-page-mode-settings {
+        background: #1e1e1e;
+        border-color: #444;
+    }
+}
+
+/* Admin specific styles */
+.bp-plg-admin-settings-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #c3c4c7;
+}
+
+.bp-plg-admin-settings-section h3 {
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+/* Ensure compatibility with different BuddyPress themes */
+body.bp-nouveau .bp-page-mode-settings {
+    /* Nouveau specific adjustments */
+}
+
+body.bp-legacy .bp-page-mode-settings {
+    /* Legacy specific adjustments */
+}
