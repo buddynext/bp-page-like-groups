@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions for BuddyPress Page-like Groups
+ * Helper functions for BuddyPress Page-like Groups - Simplified
  *
  * @package BuddyPress_Page_Like_Groups
  */
@@ -28,8 +28,8 @@ function bp_plg_get_page_mode_settings( $group_id ) {
 	$defaults = array(
 		'join_requests_need_approval' => true,
 		'allow_member_discussions' => true,
-		'enable_quick_comments' => true,
-		'show_engagement_stats' => true,
+		'enable_quick_comments' => false, // Removed feature - keep for compatibility
+		'show_engagement_stats' => false, // Removed feature - keep for compatibility
 		'member_can_invite' => false,
 		'post_approval_required' => false
 	);
@@ -70,7 +70,6 @@ function bp_plg_user_can_post( $user_id, $group_id ) {
 
 /**
  * Check if group has forums enabled
- * Based on the actual data structure from wp_bp_groups_groupmeta
  *
  * @param int $group_id Group ID (optional, defaults to current group)
  * @return bool
@@ -97,7 +96,7 @@ function bp_plg_group_has_forum_enabled( $group_id = 0 ) {
 		return false;
 	}
 
-	// Get forum_id meta - it's stored as serialized array
+	// Get forum_id meta
 	$forum_id_data = groups_get_groupmeta( $group_id, 'forum_id' );
 	
 	if ( ! $forum_id_data ) {
@@ -147,45 +146,4 @@ function bp_plg_get_group_forum_url( $group_id = 0 ) {
 	}
 
 	return bp_get_group_url( $group ) . 'forum/';
-}
-
-/**
- * Update activity view count
- *
- * @param int $activity_id Activity ID
- * @return int New view count
- */
-function bp_plg_increment_activity_views( $activity_id ) {
-	$views = (int) bp_activity_get_meta( $activity_id, 'page_post_views', true );
-	$new_views = $views + 1;
-	bp_activity_update_meta( $activity_id, 'page_post_views', $new_views );
-	return $new_views;
-}
-
-/**
- * Update activity engagement count
- *
- * @param int $activity_id Activity ID
- * @return int New engagement count
- */
-function bp_plg_increment_activity_engagement( $activity_id ) {
-	$engagement = (int) bp_activity_get_meta( $activity_id, 'page_post_engagement', true );
-	$new_engagement = $engagement + 1;
-	bp_activity_update_meta( $activity_id, 'page_post_engagement', $new_engagement );
-	return $new_engagement;
-}
-
-/**
- * Format engagement stats for display
- *
- * @param int $count The count to format
- * @param string $singular Singular label
- * @param string $plural Plural label
- * @return string Formatted string
- */
-function bp_plg_format_stat( $count, $singular, $plural ) {
-	return sprintf( 
-		_n( '%d ' . $singular, '%d ' . $plural, $count, 'bp-page-like-groups' ), 
-		$count 
-	);
 }

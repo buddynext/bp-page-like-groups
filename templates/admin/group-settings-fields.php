@@ -19,7 +19,7 @@ $has_forum = bp_plg_group_has_forum_enabled( $group_id );
 	<legend><?php esc_html_e( 'Page Mode Settings', 'bp-page-like-groups' ); ?></legend>
 	
 	<div class="page-mode-description">
-		<p><?php esc_html_e( 'Page Mode transforms your group into a Facebook Page-style community where only administrators and moderators can create posts, while all members can engage through comments and reactions.', 'bp-page-like-groups' ); ?></p>
+		<p><?php esc_html_e( 'Page Mode transforms your group into a Facebook Page-style community where only administrators and moderators can create posts, while all members can engage through comments.', 'bp-page-like-groups' ); ?></p>
 		<p><strong><?php esc_html_e( 'Perfect for:', 'bp-page-like-groups' ); ?></strong> <?php esc_html_e( 'Announcements, News Updates, Brand Communities, Official Pages', 'bp-page-like-groups' ); ?></p>
 	</div>
 
@@ -45,53 +45,10 @@ $has_forum = bp_plg_group_has_forum_enabled( $group_id );
 				<?php esc_html_e( 'Administrators Only', 'bp-page-like-groups' ); ?>
 				<span class="description"><?php esc_html_e( 'Only group admins can publish content', 'bp-page-like-groups' ); ?></span>
 			</label>
-		</div>
-
-		<!-- Member Engagement Settings -->
-		<div class="page-mode-section">
-			<h4><?php esc_html_e( 'Member Engagement', 'bp-page-like-groups' ); ?></h4>
-			
-			<label>
-				<input type="checkbox" name="settings[allow_member_discussions]" value="1" <?php checked( $settings['allow_member_discussions'], true ); ?> />
-				<?php esc_html_e( 'Allow Member Discussions', 'bp-page-like-groups' ); ?>
-				<span class="description">
-					<?php 
-					if ( $has_forum ) {
-						esc_html_e( 'Members can start discussions in the forum tab (Forum is enabled for this group)', 'bp-page-like-groups' );
-					} else {
-						esc_html_e( 'Members can start discussions in a separate tab (Note: Forum is not currently enabled for this group)', 'bp-page-like-groups' );
-					}
-					?>
-				</span>
-			</label>
-
-			<label>
-				<input type="checkbox" name="settings[enable_quick_comments]" value="1" <?php checked( $settings['enable_quick_comments'], true ); ?> />
-				<?php esc_html_e( 'Enable Quick Comments', 'bp-page-like-groups' ); ?>
-				<span class="description"><?php esc_html_e( 'Show quick comment buttons (Like, Thanks, etc.)', 'bp-page-like-groups' ); ?></span>
-			</label>
-
-			<label>
-				<input type="checkbox" name="settings[show_engagement_stats]" value="1" <?php checked( $settings['show_engagement_stats'], true ); ?> />
-				<?php esc_html_e( 'Show Engagement Stats', 'bp-page-like-groups' ); ?>
-				<span class="description"><?php esc_html_e( 'Display view counts and engagement metrics on posts', 'bp-page-like-groups' ); ?></span>
-			</label>
-		</div>
-
-		<!-- Membership Settings -->
-		<div class="page-mode-section">
-			<h4><?php esc_html_e( 'Membership Control', 'bp-page-like-groups' ); ?></h4>
-			
-			<label>
-				<input type="checkbox" name="settings[join_requests_need_approval]" value="1" <?php checked( $settings['join_requests_need_approval'], true ); ?> />
-				<?php esc_html_e( 'All join requests need approval', 'bp-page-like-groups' ); ?>
-				<span class="description"><?php esc_html_e( 'Even for public groups, members must be approved', 'bp-page-like-groups' ); ?></span>
-			</label>
-
 			<label>
 				<input type="checkbox" name="settings[member_can_invite]" value="1" <?php checked( $settings['member_can_invite'], false ); ?> />
 				<?php esc_html_e( 'Members can invite others', 'bp-page-like-groups' ); ?>
-				<span class="description"><?php esc_html_e( 'Allow regular members to invite friends', 'bp-page-like-groups' ); ?></span>
+				<span class="description"><?php esc_html_e( 'When disabled, only administrators and moderators can invite new members.', 'bp-page-like-groups' ); ?></span>
 			</label>
 		</div>
 
@@ -103,6 +60,35 @@ $has_forum = bp_plg_group_has_forum_enabled( $group_id );
 				<input type="checkbox" name="settings[post_approval_required]" value="1" <?php checked( $settings['post_approval_required'], true ); ?> />
 				<?php esc_html_e( 'Moderator posts need admin approval', 'bp-page-like-groups' ); ?>
 				<span class="description"><?php esc_html_e( 'Require admin approval for moderator posts', 'bp-page-like-groups' ); ?></span>
+			</label>
+
+		<!-- Member Engagement Settings -->
+		<div class="page-mode-section">
+			<h4><?php esc_html_e( 'Member Engagement', 'bp-page-like-groups' ); ?></h4>
+			
+			<?php if ( $has_forum ) : ?>
+			<label>
+				<input type="checkbox" name="settings[allow_member_discussions]" value="1" <?php checked( $settings['allow_member_discussions'], true ); ?> />
+				<?php esc_html_e( 'Allow Member Discussions', 'bp-page-like-groups' ); ?>
+				<span class="description">
+					<?php esc_html_e( 'Members can start discussions in the forum tab', 'bp-page-like-groups' ); ?>
+				</span>
+			</label>
+			<?php else : ?>
+			<p class="description">
+				<em><?php esc_html_e( 'Note: Forum is not enabled for this group. To use forum features, please enable the forum in the group settings.', 'bp-page-like-groups' ); ?></em>
+			</p>
+			<?php endif; ?>
+		</div>
+
+		<!-- Membership Settings -->
+		<div class="page-mode-section">
+			<h4><?php esc_html_e( 'Membership Control', 'bp-page-like-groups' ); ?></h4>
+			
+			<label>
+				<input type="checkbox" name="settings[join_requests_need_approval]" value="1" <?php checked( $settings['join_requests_need_approval'], true ); ?> />
+				<?php esc_html_e( 'Require approval for all join requests', 'bp-page-like-groups' ); ?>
+				<span class="description"><?php esc_html_e( 'Even for public groups, new members must be approved by an administrator. This helps maintain quality control for your page-style group.', 'bp-page-like-groups' ); ?></span>
 			</label>
 		</div>
 

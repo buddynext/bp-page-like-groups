@@ -9,27 +9,6 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Track post views for page groups
- */
-add_action( 'bp_activity_screen_single_activity_permalink', 'bp_plg_track_single_activity_views' );
-function bp_plg_track_single_activity_views() {
-	if ( ! bp_is_group() ) {
-		return;
-	}
-
-	$group_id = bp_get_current_group_id();
-	
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
-	}
-
-	$activity_id = bp_current_action();
-	if ( $activity_id && is_numeric( $activity_id ) ) {
-		bp_plg_increment_activity_views( $activity_id );
-	}
-}
-
-/**
  * Add body class for page mode groups
  */
 add_filter( 'body_class', 'bp_plg_add_body_class' );

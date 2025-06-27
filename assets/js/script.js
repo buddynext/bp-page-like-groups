@@ -1,7 +1,7 @@
 /**
  * BuddyPress Page-like Groups JavaScript
  * 
- * Handles quick comments and other interactive features
+ * Handles page mode functionality
  */
 
 (function($) {
@@ -9,182 +9,55 @@
 
     $(document).ready(function() {
         
-        // Debug: Check if quick comment buttons exist
-        if ($('.quick-comment-buttons').length) {
-            console.log('BuddyPress Page-like Groups: Found ' + $('.quick-comment-buttons').length + ' quick comment button sets');
-        } else {
-            console.log('BuddyPress Page-like Groups: No quick comment buttons found');
-        }
-        
-        // Handle quick comment buttons
-        $(document).on('click', '.quick-comment-buttons button.quick-comment', function(e) {
+        // Handle page mode settings toggle
+        $('#page-mode-enabled').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#page-mode-options').slideDown();
+                // Set default if none selected
+                if (!$('input[name="posting-restriction"]:checked').length) {
+                    $('#posting-restriction-mods').prop('checked', true);
+                }
+            } else {
+                $('#page-mode-options').slideUp();
+            }
+            // Handle Request Membership button clicks
+        $(document).on('click', 'a.ajax-request-membership', function(e) {
             e.preventDefault();
             
             var $button = $(this);
-            var $activity = $button.closest('.activity-item');
-            var activityId = $activity.attr('id').replace('activity-', '');
-            var commentText = $button.attr('data-comment');
+            var href = $button.attr('href');
             
-            // Disable button during processing
-            $button.prop('disabled', true).addClass('loading');
+            // Add loading state
+            $button.addClass('loading').text('Processing...');
             
-            // Send AJAX request
-            $.ajax({
-                url: bpplg.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'bpplg_quick_comment',
-                    activity_id: activityId,
-                    comment: commentText,
-                    nonce: bpplg.nonce
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Show success feedback
-                        bpplgShowFeedback($button, 'success');
-                        
-                        // Refresh the comment stream if visible
-                        var $commentsList = $activity.find('.activity-comments ul');
-                        if ($commentsList.length) {
-                            // If comments are already shown, reload them
-                            bpplgReloadComments(activityId);
-                        } else {
-                            // Update comment count
-                            var $commentCount = $activity.find('.activity-meta a.acomment-reply');
-                            if ($commentCount.length) {
-                                var currentCount = parseInt($commentCount.text().match(/\d+/) || 0);
-                                var newCount = currentCount + 1;
-                                var commentText = newCount === 1 ? 'Comment' : 'Comments';
-                                $commentCount.html('<span class="comment-count">' + newCount + '</span> ' + commentText);
-                            }
-                        }
-                        
-                        // Update engagement stats if visible
-                        var $engagementStats = $activity.find('.page-engagement-stats .engagement');
-                        if ($engagementStats.length) {
-                            var currentEngagement = parseInt($engagementStats.text().match(/\d+/) || 0);
-                            $engagementStats.html('<span class="dashicons dashicons-groups"></span> ' + (currentEngagement + 1) + ' engaged');
-                        }
-                    } else {
-                        bpplgShowFeedback($button, 'error');
-                    }
-                },
-                error: function() {
-                    bpplgShowFeedback($button, 'error');
-                },
-                complete: function() {
-                    // Re-enable button after a delay
-                    setTimeout(function() {
-                        $button.prop('disabled', false).removeClass('loading');
-                    }, 2000);
-                }
-            });
+            // Redirect to the request membership URL
+            window.location.href = href;
         });
         
-        // Show feedback for quick comments
-        function bpplgShowFeedback($button, type) {
-            var feedbackClass = type === 'success' ? 'feedback-success' : 'feedback-error';
-            var feedbackText = type === 'success' ? '✓' : '✗';
-            
-            // Create feedback element
-            var $feedback = $('<span class="quick-comment-feedback ' + feedbackClass + '">' + feedbackText + '</span>');
-            
-            // Position and show feedback
-            $button.append($feedback);
-            
-            // Remove feedback after animation
-            setTimeout(function() {
-                $feedback.fadeOut(300, function() {
-                    $(this).remove();
-                });
-            }, 1500);
-        }
-        
-        // Reload comments for an activity
-        function bpplgReloadComments(activityId) {
-            var $activity = $('#activity-' + activityId);
-            var $commentsContainer = $activity.find('.activity-comments');
-            
-            // Show loading state
-            $commentsContainer.addClass('loading');
-            
-            // Use BuddyPress's built-in comment loading if available
-            if (typeof bp !== 'undefined' && bp.Nouveau && bp.Nouveau.activity) {
-                // For BP Nouveau template pack
-                bp.Nouveau.activity.displayComments(activityId);
-            } else if (typeof jq !== 'undefined') {
-                // For BP Legacy template pack
-                jq.post(ajaxurl, {
-                    action: 'new_activity_comment',
-                    'cookie': bp_get_cookies(),
-                    '_wpnonce_new_activity_comment': jq("#_wpnonce_new_activity_comment").val(),
-                    'comment_id': 0,
-                    'form_id': activityId,
-                    'content': ''
-                },
-                function(response) {
-                    $commentsContainer.removeClass('loading');
-                    // Parse and update comments if needed
-                });
-            } else {
-                // Fallback: Simple reload by triggering show comments
-                $activity.find('.acomment-reply').trigger('click');
-                setTimeout(function() {
-                    $commentsContainer.removeClass('loading');
-                }, 1000);
-            }
-        }
-        
-        // Handle view tracking for page mode activities
-        if ($('body').hasClass('bp-page-mode-active')) {
-            // Track views when activities come into viewport
-            var viewedActivities = [];
-            
-            function trackActivityViews() {
-                $('.activity-item').each(function() {
-                    var $activity = $(this);
-                    var activityId = $activity.attr('id').replace('activity-', '');
-                    
-                    // Check if activity is in viewport and hasn't been tracked
-                    if (isInViewport($activity) && viewedActivities.indexOf(activityId) === -1) {
-                        viewedActivities.push(activityId);
-                        
-                        // Send view tracking request
-                        $.post(bpplg.ajax_url, {
-                            action: 'bpplg_track_view',
-                            activity_id: activityId,
-                            nonce: bpplg.nonce
-                        });
-                    }
-                });
-            }
-            
-            // Check if element is in viewport
-            function isInViewport($element) {
-                var elementTop = $element.offset().top;
-                var elementBottom = elementTop + $element.outerHeight();
-                var viewportTop = $(window).scrollTop();
-                var viewportBottom = viewportTop + $(window).height();
-                
-                return elementBottom > viewportTop && elementTop < viewportBottom;
-            }
-            
-            // Track views on scroll and initial load
-            $(window).on('scroll', _.throttle(trackActivityViews, 250));
-            trackActivityViews(); // Initial check
-        }
-        
-        // Enhance quick comment buttons with hover effects
-        $(document).on('mouseenter', '.quick-comment-buttons button', function() {
-            $(this).addClass('hover');
-        }).on('mouseleave', '.quick-comment-buttons button', function() {
-            $(this).removeClass('hover');
-        });
+    });
         
         // Add body class if we're in a page mode group
         if ($('.bp-page-mode-badge').length) {
             $('body').addClass('bp-page-mode-active');
         }
+        
+        // Handle view tracking for page mode activities - REMOVED FEATURE
+        // Engagement stats feature has been removed from this version
+        
+        // Handle join request form submission for public page mode groups
+        $(document).on('click', '.group-button.join-group', function(e) {
+            var $button = $(this);
+            var $groupItem = $button.closest('.group-item, #item-header');
+            
+            // Check if this is a page mode group with join approval required
+            if ($groupItem.find('.bp-page-mode-badge').length && 
+                $button.text().indexOf('Request Membership') !== -1) {
+                
+                // Add visual feedback
+                $button.addClass('loading').prop('disabled', true);
+            }
+        });
+        
     });
     
 })(jQuery);

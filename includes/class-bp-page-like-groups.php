@@ -85,13 +85,6 @@ class BP_Page_Like_Groups {
 		// Group header badge
 		add_action( 'bp_group_header_meta', array( $this, 'add_page_mode_badge' ) );
 
-		// Activity meta buttons (for engagement features)
-		add_action( 'bp_activity_entry_meta', array( $this, 'add_activity_meta_buttons' ) );
-		
-		// Fallback for themes that might not have the above hook
-		add_action( 'bp_activity_entry_content', array( $this, 'add_activity_meta_buttons_fallback' ), 20 );
-		add_action( 'bp_after_activity_entry_comments', array( $this, 'add_activity_meta_buttons_legacy' ) );
-
 		// Member request moderation
 		add_filter( 'bp_groups_auto_accept_membership_requests', array( $this, 'maybe_moderate_join_requests' ), 10, 2 );
 	}
@@ -324,75 +317,6 @@ class BP_Page_Like_Groups {
 		}
 
 		include BP_PLG_PLUGIN_DIR . 'templates/page-mode-badge.php';
-	}
-
-	/**
-	 * Add activity meta buttons for engagement
-	 */
-	public function add_activity_meta_buttons() {
-		if ( ! bp_is_group() ) {
-			return;
-		}
-
-		$group_id = bp_get_current_group_id();
-		
-		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-			return;
-		}
-
-		include BP_PLG_PLUGIN_DIR . 'templates/activity-meta-buttons.php';
-	}
-	
-	/**
-	 * Fallback method for themes without bp_activity_entry_meta hook
-	 */
-	public function add_activity_meta_buttons_fallback() {
-		// Only use this if buttons haven't been displayed yet
-		static $displayed = array();
-		$activity_id = bp_get_activity_id();
-		
-		if ( isset( $displayed[$activity_id] ) ) {
-			return;
-		}
-		
-		// Check if we should display
-		if ( ! bp_is_group() || ! doing_action( 'bp_activity_entry_content' ) ) {
-			return;
-		}
-		
-		$group_id = bp_get_current_group_id();
-		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-			return;
-		}
-		
-		// Check if the buttons were already added by primary hook
-		if ( has_action( 'bp_activity_entry_meta', array( $this, 'add_activity_meta_buttons' ) ) ) {
-			return;
-		}
-		
-		$displayed[$activity_id] = true;
-		echo '<div class="bp-plg-activity-buttons-fallback">';
-		include BP_PLG_PLUGIN_DIR . 'templates/activity-meta-buttons.php';
-		echo '</div>';
-	}
-	
-	/**
-	 * Legacy method for older themes
-	 */
-	public function add_activity_meta_buttons_legacy() {
-		// Similar check for legacy themes
-		if ( ! bp_is_group() || ! bp_is_single_activity() ) {
-			return;
-		}
-		
-		$group_id = bp_get_current_group_id();
-		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-			return;
-		}
-		
-		echo '<div class="bp-plg-activity-buttons-legacy">';
-		include BP_PLG_PLUGIN_DIR . 'templates/activity-meta-buttons.php';
-		echo '</div>';
 	}
 
 	/**

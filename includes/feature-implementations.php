@@ -1,6 +1,6 @@
 <?php
 /**
- * Feature Implementations for each Page Mode option
+ * Main plugin class
  *
  * @package BuddyPress_Page_Like_Groups
  */
@@ -9,315 +9,371 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * 1. POSTING RESTRICTIONS - Who can publish posts?
- * Options: Administrators and Moderators / Administrators Only
+ * Main plugin class
  */
+class BP_Page_Like_Groups {
 
-// Hide post form for non-authorized users
-add_action( 'bp_before_group_activity_post_form', 'bp_plg_check_posting_permission', 1 );
-function bp_plg_check_posting_permission() {
-	if ( ! bp_is_group() ) {
-		return;
+	/**
+	 * Singleton instance
+	 */
+	private static $instance = null;
+
+	/**
+	 * Meta keys
+	 */
+	const META_KEY_ENABLED = '_group_page_mode_enabled';
+	const META_KEY_RESTRICTION = '_group_posting_restriction';
+	const META_KEY_SETTINGS = '_group_page_mode_settings';
+
+	/**
+	 * Get singleton instance
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
 	}
 
-	$group_id = bp_get_current_group_id();
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
+	/**
+	 * Constructor
+	 */
+	private function __construct() {
+		// Hook into BuddyPress
+		add_action( 'bp_loaded', array( $this, 'init' ) );
 	}
 
-	$user_id = bp_loggedin_user_id();
-	if ( ! bp_plg_user_can_post( $user_id, $group_id ) ) {
-		// Hide the form with CSS
+	/**
+	 * Initialize plugin
+	 */
+	public function init() {
+		// Add hooks
+		$this->add_hooks();
+		
+		// Setup integrations
+		$this->setup_integrations();
+	}
+
+	/**
+	 * Add all hooks and filters
+	 */
+	private function add_hooks() {
+		// Group creation/settings form - Add to existing settings
+		add_action( 'bp_after_group_settings_creation_step', array( $this, 'add_page_mode_fields' ) );
+		add_action( 'bp_after_group_settings_admin', array( $this, 'add_page_mode_fields' ) );
+		
+		// Alternative hooks for different themes/versions
+		add_action( 'bp_before_group_settings_creation_step', array( $this, 'add_page_mode_fields_before' ) );
+		add_action( 'bp_before_group_settings_admin', array( $this, 'add_page_mode_fields_before' ) );
+
+		// Save settings - Hook into the existing save process
+		add_action( 'groups_create_group_step_save_group-settings', array( $this, 'save_page_mode_settings' ) );
+		add_action( 'groups_group_settings_edited', array( $this, 'save_page_mode_settings' ) );
+
+		// Filter activity post form display
+		add_filter( 'bp_activity_can_post', array( $this, 'check_group_posting_permission' ) );
+
+		// Modify activity post form
+		add_action( 'bp_before_group_activity_post_form', array( $this, 'maybe_show_restriction_message' ) );
+
+		// Filter AJAX posting capability
+		add_filter( 'bp_activity_user_can_post', array( $this, 'filter_ajax_posting_capability' ), 10, 2 );
+
+		// Add custom CSS and JS
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// Group header badge
+		add_action( 'bp_group_header_meta', array( $this, 'add_page_mode_badge' ) );
+	}
+
+	/**
+	 * Setup integrations with other Wbcom plugins
+	 */
+	private function setup_integrations() {
+		// Only add integration hooks if the respective plugins exist
+		
+		// Integration with BuddyPress Moderation
+		if ( class_exists( 'BP_Moderation' ) ) {
+			add_filter( 'bp_moderation_group_settings', array( $this, 'add_moderation_settings' ) );
+		}
+
+		// Integration with BuddyPress Polls  
+		if ( function_exists( 'bp_polls_init' ) ) {
+			add_filter( 'bp_polls_group_support', array( $this, 'enable_polls_for_page_groups' ), 10, 2 );
+		}
+
+		// Integration with BuddyPress Reactions
+		if ( class_exists( 'BP_Reactions' ) ) {
+			add_filter( 'bp_reactions_group_support', array( $this, 'customize_reactions_for_pages' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Add moderation settings for page mode groups
+	 */
+	public function add_moderation_settings( $settings ) {
+		$group_id = bp_get_current_group_id();
+		if ( ! $group_id || ! bp_plg_is_page_mode_enabled( $group_id ) ) {
+			return $settings;
+		}
+
+		$settings['page_mode'] = array(
+			'auto_moderate_non_admin_posts' => true,
+			'require_approval_for_first_post' => true,
+			'flag_threshold' => 3,
+		);
+
+		return $settings;
+	}
+
+	/**
+	 * Enable polls for page mode groups (admin/mod only)
+	 */
+	public function enable_polls_for_page_groups( $enabled, $group_id ) {
+		if ( bp_plg_is_page_mode_enabled( $group_id ) ) {
+			$user_id = bp_loggedin_user_id();
+			return groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
+		}
+		return $enabled;
+	}
+
+	/**
+	 * Customize reactions for page mode
+	 */
+	public function customize_reactions_for_pages( $reactions, $group_id ) {
+		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
+			return $reactions;
+		}
+
+		$page_reactions = array(
+			'announce' => array(
+				'emoji' => '📢',
+				'label' => __( 'Announcement', 'bp-page-like-groups' ),
+				'admin_only' => true
+			),
+			'official' => array(
+				'emoji' => '✅', 
+				'label' => __( 'Official', 'bp-page-like-groups' ),
+				'admin_only' => true
+			)
+		);
+
+		return array_merge( $reactions, $page_reactions );
+	}
+
+	/**
+	 * Add page mode fields to group settings
+	 */
+	public function add_page_mode_fields() {
+		// Get the template file path
+		$template_path = BP_PLG_PLUGIN_DIR . 'templates/admin/group-settings-fields.php';
+		
+		// Check if template exists
+		if ( file_exists( $template_path ) ) {
+			include $template_path;
+		} else {
+			// Fallback: Display inline if template not found
+			$this->display_inline_settings();
+		}
+	}
+	
+	/**
+	 * Add page mode fields before standard fields (alternative hook)
+	 */
+	public function add_page_mode_fields_before() {
+		// Only run if not already displayed
+		static $displayed = false;
+		if ( $displayed ) {
+			return;
+		}
+		$displayed = true;
+		
+		// Close any open fieldset first
+		echo '</fieldset><fieldset class="bp-page-mode-fieldset">';
+		$this->add_page_mode_fields();
+		echo '</fieldset><fieldset>';
+	}
+	
+	/**
+	 * Display settings inline as fallback
+	 */
+	private function display_inline_settings() {
+		$group_id = bp_get_current_group_id();
+		$page_mode_enabled = bp_plg_is_page_mode_enabled( $group_id );
+		?>
+		<hr style="margin: 30px 0;" />
+		<div class="bp-page-mode-settings-wrapper">
+			<h4><?php esc_html_e( 'Page Mode Settings (Optional)', 'bp-page-like-groups' ); ?></h4>
+			<label>
+				<input type="checkbox" name="page-mode-enabled" value="1" <?php checked( $page_mode_enabled ); ?> />
+				<?php esc_html_e( 'Enable Page Mode - Transform this group into a Facebook Page-style community', 'bp-page-like-groups' ); ?>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save page mode settings
+	 */
+	public function save_page_mode_settings( $group_id ) {
+		// Verify permissions
+		if ( ! bp_is_item_admin() && ! bp_current_user_can( 'bp_moderate' ) ) {
+			return;
+		}
+
+		// Save page mode enabled status
+		$page_mode_enabled = isset( $_POST['page-mode-enabled'] ) && $_POST['page-mode-enabled'] == '1';
+		groups_update_groupmeta( $group_id, self::META_KEY_ENABLED, $page_mode_enabled );
+
+		if ( $page_mode_enabled ) {
+			// Save posting restriction
+			if ( isset( $_POST['posting-restriction'] ) ) {
+				$restriction = sanitize_text_field( $_POST['posting-restriction'] );
+				groups_update_groupmeta( $group_id, self::META_KEY_RESTRICTION, $restriction );
+			}
+
+			// Save settings
+			$settings = array();
+			if ( isset( $_POST['settings'] ) ) {
+				foreach ( $_POST['settings'] as $key => $value ) {
+					$settings[ sanitize_key( $key ) ] = absint( $value );
+				}
+			}
+			groups_update_groupmeta( $group_id, self::META_KEY_SETTINGS, $settings );
+		}
+	}
+
+	/**
+	 * Check if user can post in current group
+	 */
+	public function check_group_posting_permission( $can_post ) {
+		if ( ! bp_is_group() ) {
+			return $can_post;
+		}
+
+		$group_id = bp_get_current_group_id();
+		$user_id = bp_loggedin_user_id();
+
+		return bp_plg_user_can_post( $user_id, $group_id );
+	}
+
+	/**
+	 * Filter AJAX posting capability
+	 */
+	public function filter_ajax_posting_capability( $can_post, $user_id ) {
+		if ( ! isset( $_POST['object'] ) || 'groups' !== $_POST['object'] ) {
+			return $can_post;
+		}
+
+		$group_id = isset( $_POST['item_id'] ) ? intval( $_POST['item_id'] ) : 0;
+		
+		if ( ! $group_id ) {
+			return $can_post;
+		}
+
+		return bp_plg_user_can_post( $user_id, $group_id );
+	}
+
+	/**
+	 * Show restriction message if user cannot post
+	 */
+	public function maybe_show_restriction_message() {
+		if ( ! bp_is_group() ) {
+			return;
+		}
+
+		$group_id = bp_get_current_group_id();
+		$user_id = bp_loggedin_user_id();
+
+		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
+			return;
+		}
+
+		if ( bp_plg_user_can_post( $user_id, $group_id ) ) {
+			return;
+		}
+
+		include BP_PLG_PLUGIN_DIR . 'templates/member-restriction-message.php';
+
+		// Hide the post form
 		echo '<style>#whats-new-form { display: none !important; }</style>';
-		
-		// Show the restriction message (already implemented)
-		return;
-	}
-}
-
-// Filter activity posting via AJAX
-add_filter( 'bp_activity_post_pre_validate', 'bp_plg_validate_activity_post', 10, 2 );
-function bp_plg_validate_activity_post( $valid, $args ) {
-	if ( ! $valid || ! isset( $args['object'] ) || 'groups' !== $args['object'] ) {
-		return $valid;
 	}
 
-	$group_id = isset( $args['item_id'] ) ? intval( $args['item_id'] ) : 0;
-	if ( ! $group_id || ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return $valid;
-	}
-
-	$user_id = bp_loggedin_user_id();
-	if ( ! bp_plg_user_can_post( $user_id, $group_id ) ) {
-		bp_core_add_message( __( 'You do not have permission to post in this group.', 'bp-page-like-groups' ), 'error' );
-		return false;
-	}
-
-	return $valid;
-}
-
-/**
- * 2. QUICK REACTIONS - Enable quick reactions (Like, Love, Thanks)
- * This is already implemented in ajax-handlers.php and templates/activity-meta-buttons.php
- */
-
-// Ensure quick reactions only show when enabled
-add_filter( 'bp_plg_show_quick_reactions', 'bp_plg_should_show_quick_reactions', 10, 2 );
-function bp_plg_should_show_quick_reactions( $show, $group_id ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return false;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	return ! empty( $settings['enable_quick_comments'] );
-}
-
-/**
- * 3. ENGAGEMENT STATS - Show view counts and engagement stats
- */
-
-// Track activity views
-add_action( 'bp_activity_screen_single_activity_permalink', 'bp_plg_track_activity_view' );
-function bp_plg_track_activity_view() {
-	if ( ! bp_is_group() ) {
-		return;
-	}
-
-	$group_id = bp_get_current_group_id();
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	if ( empty( $settings['show_engagement_stats'] ) ) {
-		return;
-	}
-
-	// Track the view
-	$activity_id = bp_current_action();
-	if ( $activity_id && is_numeric( $activity_id ) ) {
-		bp_plg_increment_activity_views( $activity_id );
-	}
-}
-
-// Track activity list views via AJAX
-add_action( 'wp_ajax_bp_plg_track_list_view', 'bp_plg_ajax_track_list_view' );
-add_action( 'wp_ajax_nopriv_bp_plg_track_list_view', 'bp_plg_ajax_track_list_view' );
-function bp_plg_ajax_track_list_view() {
-	$activity_ids = isset( $_POST['activity_ids'] ) ? array_map( 'intval', $_POST['activity_ids'] ) : array();
-	$group_id = isset( $_POST['group_id'] ) ? intval( $_POST['group_id'] ) : 0;
-
-	if ( ! $group_id || ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		wp_die();
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	if ( empty( $settings['show_engagement_stats'] ) ) {
-		wp_die();
-	}
-
-	foreach ( $activity_ids as $activity_id ) {
-		bp_plg_increment_activity_views( $activity_id );
-	}
-
-	wp_send_json_success();
-}
-
-/**
- * 4. FORUM DISCUSSIONS - Allow members to start forum discussions
- */
-
-// Control forum posting permissions
-add_filter( 'bbp_current_user_can_publish_topics', 'bp_plg_filter_forum_posting', 10, 1 );
-function bp_plg_filter_forum_posting( $can_publish ) {
-	if ( ! bp_is_group() ) {
-		return $can_publish;
-	}
-
-	$group_id = bp_get_current_group_id();
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return $can_publish;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	
-	// If member discussions are not allowed, only admins/mods can post
-	if ( empty( $settings['allow_member_discussions'] ) ) {
-		$user_id = bp_loggedin_user_id();
-		return groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
-	}
-
-	return $can_publish;
-}
-
-// Show/hide forum tab based on settings
-add_filter( 'bp_group_forum_enable', 'bp_plg_maybe_disable_forum_tab', 10, 2 );
-function bp_plg_maybe_disable_forum_tab( $enable, $group ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group->id ) ) {
-		return $enable;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group->id );
-	
-	// If discussions are not allowed and user is not admin/mod, hide forum tab
-	if ( empty( $settings['allow_member_discussions'] ) ) {
-		$user_id = bp_loggedin_user_id();
-		if ( ! groups_is_user_admin( $user_id, $group->id ) && ! groups_is_user_mod( $user_id, $group->id ) ) {
-			return false;
+	/**
+	 * Add page mode badge to group header
+	 */
+	public function add_page_mode_badge() {
+		if ( ! bp_is_group() ) {
+			return;
 		}
-	}
 
-	return $enable;
-}
-
-/**
- * 5. JOIN REQUESTS - Require approval for all join requests
- */
-
-// Force membership requests even for public groups
-add_filter( 'bp_group_auto_join', 'bp_plg_prevent_auto_join', 10, 2 );
-function bp_plg_prevent_auto_join( $auto_join, $group ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group->id ) ) {
-		return $auto_join;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group->id );
-	
-	// If approval is required, prevent auto-join
-	if ( ! empty( $settings['join_requests_need_approval'] ) ) {
-		return false;
-	}
-
-	return $auto_join;
-}
-
-// Modify join button behavior
-add_filter( 'bp_get_group_join_button', 'bp_plg_modify_join_button', 10, 2 );
-function bp_plg_modify_join_button( $button, $group ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group->id ) ) {
-		return $button;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group->id );
-	
-	if ( ! empty( $settings['join_requests_need_approval'] ) && 'public' === $group->status ) {
-		// Change button to "Request Membership" even for public groups
-		if ( isset( $button['id'] ) && 'join_group' === $button['id'] ) {
-			$button['link_text'] = __( 'Request Membership', 'bp-page-like-groups' );
-			$button['link_title'] = __( 'Request to join this group', 'bp-page-like-groups' );
+		$group_id = bp_get_current_group_id();
+		
+		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
+			return;
 		}
+
+		include BP_PLG_PLUGIN_DIR . 'templates/page-mode-badge.php';
 	}
 
-	return $button;
-}
+	/**
+	 * Enqueue scripts and styles
+	 */
+	public function enqueue_scripts() {
+		if ( ! bp_is_group() && ! bp_is_groups_component() ) {
+			return;
+		}
 
-// Handle join requests for public Page Mode groups
-add_action( 'groups_join_group', 'bp_plg_handle_join_request', 5, 2 );
-function bp_plg_handle_join_request( $group_id, $user_id ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
+		wp_enqueue_style( 
+			'bp-page-like-groups', 
+			BP_PLG_PLUGIN_URL . 'assets/css/style.css', 
+			array(), 
+			BP_PLG_VERSION 
+		);
+
+		// Add inline CSS for backward compatibility
+		wp_add_inline_style( 'bp-page-like-groups', '
+			/* Ensure Page Mode settings don\'t interfere with core group settings */
+			.group-settings fieldset:not(.bp-page-mode-settings) {
+				/* Preserve existing fieldset styles */
+			}
+			
+			/* Page Mode specific styles */
+			.bp-page-mode-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				padding: 5px 12px;
+				margin-left: 10px;
+				background: #0073aa;
+				color: #fff;
+				font-size: 12px;
+				font-weight: 600;
+				text-transform: uppercase;
+				border-radius: 3px;
+			}
+			.bp-page-mode-badge .dashicons {
+				font-size: 16px;
+				width: 16px;
+				height: 16px;
+			}
+		' );
+
+		wp_enqueue_script( 
+			'bp-page-like-groups', 
+			BP_PLG_PLUGIN_URL . 'assets/js/script.js', 
+			array( 'jquery' ), 
+			BP_PLG_VERSION, 
+			true 
+		);
+
+		wp_localize_script( 'bp-page-like-groups', 'bpplg', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'bpplg-nonce' ),
+			'i18n' => array(
+				'loading' => __( 'Loading...', 'bp-page-like-groups' ),
+				'error' => __( 'An error occurred. Please try again.', 'bp-page-like-groups' ),
+			)
+		) );
 	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	$group = groups_get_group( $group_id );
-	
-	if ( ! empty( $settings['join_requests_need_approval'] ) && 'public' === $group->status ) {
-		// Remove the user from group
-		groups_leave_group( $group_id, $user_id );
-		
-		// Create a membership request instead
-		groups_send_membership_request( $user_id, $group_id );
-		
-		// Redirect with message
-		bp_core_add_message( __( 'Your membership request has been sent to the group administrator.', 'bp-page-like-groups' ) );
-		bp_core_redirect( bp_get_group_permalink( $group ) );
-		exit;
-	}
-}
-
-/**
- * 6. MEMBER INVITES - Allow members to invite others
- */
-
-// Control who can send invites
-add_filter( 'bp_groups_user_can_send_invites', 'bp_plg_filter_invite_capability', 10, 3 );
-function bp_plg_filter_invite_capability( $can_send, $group_id, $user_id ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return $can_send;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	
-	// If member invites are disabled, only admins/mods can invite
-	if ( empty( $settings['member_can_invite'] ) ) {
-		return groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
-	}
-
-	return $can_send;
-}
-
-// Hide invite tab for regular members if disabled
-add_action( 'bp_actions', 'bp_plg_maybe_hide_invite_tab' );
-function bp_plg_maybe_hide_invite_tab() {
-	if ( ! bp_is_group() ) {
-		return;
-	}
-
-	$group_id = bp_get_current_group_id();
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	$user_id = bp_loggedin_user_id();
-	
-	// If member invites are disabled and user is not admin/mod, remove invite nav
-	if ( empty( $settings['member_can_invite'] ) && 
-	     ! groups_is_user_admin( $user_id, $group_id ) && 
-	     ! groups_is_user_mod( $user_id, $group_id ) ) {
-		
-		bp_core_remove_subnav_item( bp_get_current_group_slug(), 'send-invites' );
-	}
-}
-
-/**
- * 7. PAGE MODE INDICATOR - Visual indicators when Page Mode is active
- */
-
-// Add indicator to activity items
-add_filter( 'bp_get_activity_action', 'bp_plg_add_activity_indicator', 10, 2 );
-function bp_plg_add_activity_indicator( $action, $activity ) {
-	if ( 'groups' !== $activity->component || ! $activity->item_id ) {
-		return $action;
-	}
-
-	if ( ! bp_plg_is_page_mode_enabled( $activity->item_id ) ) {
-		return $action;
-	}
-
-	// Add page icon to admin/mod posts
-	$user_id = $activity->user_id;
-	if ( groups_is_user_admin( $user_id, $activity->item_id ) || 
-	     groups_is_user_mod( $user_id, $activity->item_id ) ) {
-		$icon = '<span class="page-post-indicator" title="' . esc_attr__( 'Official Page Post', 'bp-page-like-groups' ) . '">📢</span> ';
-		$action = $icon . $action;
-	}
-
-	return $action;
-}
-
-// Add "Follow" button for Page Mode groups instead of "Join"
-add_filter( 'bp_get_group_join_button', 'bp_plg_maybe_add_follow_button', 20, 2 );
-function bp_plg_maybe_add_follow_button( $button, $group ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group->id ) ) {
-		return $button;
-	}
-
-	// Optional: Change "Join" to "Follow" for better Page semantics
-	if ( isset( $button['link_text'] ) && __( 'Join Group', 'buddypress' ) === $button['link_text'] ) {
-		$button['link_text'] = __( 'Follow Page', 'bp-page-like-groups' );
-		$button['link_title'] = __( 'Follow this page', 'bp-page-like-groups' );
-	}
-
-	return $button;
 }
