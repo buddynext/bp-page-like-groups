@@ -10,15 +10,22 @@
     $(document).ready(function() {
         
         // Handle page mode settings toggle
-        $('#page-mode-enabled').on('change', function() {
+        $('#page-mode-enabled, #bp-plg-page-mode-enabled').on('change', function() {
+            var $options = $(this).attr('id') === 'bp-plg-page-mode-enabled' 
+                ? $('#bp-plg-page-mode-options') 
+                : $('#page-mode-options');
+            
             if ($(this).is(':checked')) {
-                $('#page-mode-options').slideDown();
+                $options.slideDown();
                 // Set default if none selected
                 if (!$('input[name="posting-restriction"]:checked').length) {
-                    $('#posting-restriction-mods').prop('checked', true);
+                    var defaultRadio = $(this).attr('id') === 'bp-plg-page-mode-enabled'
+                        ? $('#bp-plg-posting-restriction-mods')
+                        : $('#posting-restriction-mods');
+                    defaultRadio.prop('checked', true);
                 }
             } else {
-                $('#page-mode-options').slideUp();
+                $options.slideUp();
             }
         });
         

@@ -4,7 +4,8 @@
  */
 
 /* Page Mode Settings Section - Frontend & Backend */
-.bp-page-mode-settings {
+.bp-page-mode-settings,
+.bp-plg-page-mode-settings {
     margin-top: 30px;
     padding: 20px;
     background: #f7f7f7;
@@ -12,14 +13,16 @@
     border-radius: 5px;
 }
 
-.bp-page-mode-legend {
+.bp-page-mode-legend,
+.bp-plg-page-mode-settings legend {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 15px;
     color: #23282d;
 }
 
-.page-mode-description {
+.page-mode-description,
+.bp-plg-page-mode-description {
     background: #fff;
     padding: 15px;
     margin-bottom: 20px;
@@ -27,31 +30,37 @@
     border: 1px solid #e5e5e5;
 }
 
-.page-mode-description p {
+.page-mode-description p,
+.bp-plg-page-mode-description p {
     margin: 0 0 10px 0;
 }
 
-.page-mode-description p:last-child {
+.page-mode-description p:last-child,
+.bp-plg-page-mode-description p:last-child {
     margin-bottom: 0;
 }
 
-.page-mode-main-toggle {
+.page-mode-main-toggle,
+.bp-plg-page-mode-main-toggle {
     display: block;
     font-size: 15px;
     margin: 20px 0;
     cursor: pointer;
 }
 
-.page-mode-main-toggle input[type="checkbox"] {
+.page-mode-main-toggle input[type="checkbox"],
+.bp-plg-page-mode-main-toggle input[type="checkbox"] {
     margin-right: 8px;
 }
 
-.page-mode-options-container {
+.page-mode-options-container,
+#bp-plg-page-mode-options {
     margin-left: 25px;
     margin-top: 20px;
 }
 
-.page-mode-section {
+.page-mode-section,
+.bp-plg-page-mode-section {
     background: #fff;
     padding: 15px;
     margin: 15px 0;
@@ -59,7 +68,8 @@
     border: 1px solid #e5e5e5;
 }
 
-.page-mode-section h4 {
+.page-mode-section h4,
+.bp-plg-page-mode-section h4 {
     margin-top: 0;
     margin-bottom: 15px;
     color: #23282d;
@@ -67,22 +77,27 @@
     font-weight: 600;
 }
 
-.page-mode-section label {
+.page-mode-section label,
+.bp-plg-page-mode-section label {
     display: block;
     margin-bottom: 12px;
     cursor: pointer;
 }
 
-.page-mode-section label:last-child {
+.page-mode-section label:last-child,
+.bp-plg-page-mode-section label:last-child {
     margin-bottom: 0;
 }
 
 .page-mode-section input[type="radio"],
-.page-mode-section input[type="checkbox"] {
+.page-mode-section input[type="checkbox"],
+.bp-plg-page-mode-section input[type="radio"],
+.bp-plg-page-mode-section input[type="checkbox"] {
     margin-right: 8px;
 }
 
-.page-mode-section .description {
+.page-mode-section .description,
+.bp-plg-page-mode-section .bp-plg-description {
     display: block;
     margin-top: 5px;
     margin-left: 24px;

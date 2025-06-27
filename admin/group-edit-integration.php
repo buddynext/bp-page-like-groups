@@ -27,7 +27,8 @@ function bp_plg_add_group_meta_box() {
  * Render meta box content
  */
 function bp_plg_render_group_meta_box( $group ) {
-	$group_id = $group->id;
+	// Extract group ID from the group object
+	$group_id = is_object( $group ) ? $group->id : $group;
 	
 	// Add nonce field
 	wp_nonce_field( 'bp_plg_save_group_settings', 'bp_plg_nonce' );
@@ -72,12 +73,7 @@ function bp_plg_save_meta_box_settings( $group_id ) {
 
 		// Save settings
 		$settings = array(
-			'join_requests_need_approval' => isset( $_POST['settings']['join_requests_need_approval'] ) ? 1 : 0,
 			'allow_member_discussions' => isset( $_POST['settings']['allow_member_discussions'] ) ? 1 : 0,
-			'enable_quick_comments' => isset( $_POST['settings']['enable_quick_comments'] ) ? 1 : 0,
-			'show_engagement_stats' => isset( $_POST['settings']['show_engagement_stats'] ) ? 1 : 0,
-			'member_can_invite' => isset( $_POST['settings']['member_can_invite'] ) ? 1 : 0,
-			'post_approval_required' => isset( $_POST['settings']['post_approval_required'] ) ? 1 : 0,
 		);
 		
 		groups_update_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS, $settings );
@@ -241,12 +237,7 @@ function bp_plg_handle_toggle_action() {
 	// Set default settings when enabling
 	if ( $enabled && ! groups_get_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS ) ) {
 		$default_settings = array(
-			'join_requests_need_approval' => true,
 			'allow_member_discussions' => true,
-			'enable_quick_comments' => true,
-			'show_engagement_stats' => true,
-			'member_can_invite' => false,
-			'post_approval_required' => false
 		);
 		groups_update_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS, $default_settings );
 		groups_update_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_RESTRICTION, 'mods' );

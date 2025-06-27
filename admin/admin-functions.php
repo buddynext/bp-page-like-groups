@@ -31,6 +31,8 @@ function bp_plg_admin_group_settings( $group_id ) {
 	?>
 	<h2><?php esc_html_e( 'Page Mode Settings', 'bp-page-like-groups' ); ?></h2>
 	<?php
+	// Make sure $group_id is available in the included template
+	$group_id = $group_id;
 	// Include the same settings template used in frontend
 	include BP_PLG_PLUGIN_DIR . 'templates/admin/group-settings-fields.php';
 }
@@ -133,12 +135,7 @@ function bp_plg_handle_bulk_actions() {
 		// Set default settings when enabling
 		if ( $value && ! groups_get_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS ) ) {
 			$default_settings = array(
-				'join_requests_need_approval' => true,
 				'allow_member_discussions' => true,
-				'enable_quick_comments' => true,
-				'show_engagement_stats' => true,
-				'member_can_invite' => false,
-				'post_approval_required' => false
 			);
 			groups_update_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS, $default_settings );
 			groups_update_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_RESTRICTION, 'mods' );
@@ -214,7 +211,7 @@ function bp_plg_admin_page() {
 					<li><?php esc_html_e( 'Go to any group\'s settings page (frontend or admin)', 'bp-page-like-groups' ); ?></li>
 					<li><?php esc_html_e( 'Enable "Page Mode" in the settings', 'bp-page-like-groups' ); ?></li>
 					<li><?php esc_html_e( 'Choose who can post (Admins only or Admins & Moderators)', 'bp-page-like-groups' ); ?></li>
-					<li><?php esc_html_e( 'Configure engagement options like quick reactions and forum discussions', 'bp-page-like-groups' ); ?></li>
+					<li><?php esc_html_e( 'Configure member engagement options like forum discussions', 'bp-page-like-groups' ); ?></li>
 				</ol>
 			</div>
 		</div>
@@ -383,37 +380,43 @@ function bp_plg_enqueue_admin_styles( $hook ) {
 		}
 		
 		/* Group edit page styles */
-		.groups-php .page-mode-section {
+		.groups-php .page-mode-section,
+		.groups-php .bp-plg-page-mode-section {
 			background: #f6f7f7;
 			padding: 15px;
 			margin: 15px 0;
 			border: 1px solid #dcdcde;
 			border-radius: 4px;
 		}
-		.groups-php .page-mode-section h4 {
+		.groups-php .page-mode-section h4,
+		.groups-php .bp-plg-page-mode-section h4 {
 			margin-top: 0;
 			margin-bottom: 15px;
 			color: #1d2327;
 		}
-		.groups-php .page-mode-section label {
+		.groups-php .page-mode-section label,
+		.groups-php .bp-plg-page-mode-section label {
 			display: block;
 			margin-bottom: 10px;
 		}
-		.groups-php .page-mode-section .description {
+		.groups-php .page-mode-section .description,
+		.groups-php .bp-plg-page-mode-section .bp-plg-description {
 			display: block;
 			margin-top: 5px;
 			color: #646970;
 			font-size: 13px;
 			font-style: normal;
 		}
-		.groups-php .page-mode-description {
+		.groups-php .page-mode-description,
+		.groups-php .bp-plg-page-mode-description {
 			background: #f0f6fc;
 			border: 1px solid #72aee6;
 			padding: 15px;
 			margin-bottom: 20px;
 			border-radius: 4px;
 		}
-		.groups-php #page-mode-options {
+		.groups-php #page-mode-options,
+		.groups-php #bp-plg-page-mode-options {
 			margin-left: 20px;
 			margin-top: 15px;
 		}
