@@ -55,8 +55,7 @@ function bp_plg_validate_activity_post( $valid, $args ) {
 }
 
 /**
- * 4. FORUM DISCUSSIONS - Allow members to start forum discussions
- * IMPROVED: Better compatibility with bbPress and different configurations
+ * 2. FORUM DISCUSSIONS - Allow members to start forum discussions
  */
 
 // Control forum topic creation permissions
@@ -149,57 +148,7 @@ function bp_plg_hide_forum_create_button() {
 }
 
 /**
- * 5. JOIN REQUESTS - Removed for public groups
- * This feature only makes sense for private groups, which already have this built-in
- */
-
-/**
- * 6. MEMBER INVITES - Allow members to invite others
- */
-
-// Control who can send invites
-add_filter( 'bp_groups_user_can_send_invites', 'bp_plg_filter_invite_capability', 10, 3 );
-function bp_plg_filter_invite_capability( $can_send, $group_id, $user_id ) {
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return $can_send;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	
-	// If member invites are disabled, only admins/mods can invite
-	if ( empty( $settings['member_can_invite'] ) ) {
-		return groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
-	}
-
-	return $can_send;
-}
-
-// Hide invite tab for regular members if disabled
-add_action( 'bp_actions', 'bp_plg_maybe_hide_invite_tab' );
-function bp_plg_maybe_hide_invite_tab() {
-	if ( ! bp_is_group() ) {
-		return;
-	}
-
-	$group_id = bp_get_current_group_id();
-	if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-		return;
-	}
-
-	$settings = bp_plg_get_page_mode_settings( $group_id );
-	$user_id = bp_loggedin_user_id();
-	
-	// If member invites are disabled and user is not admin/mod, remove invite nav
-	if ( empty( $settings['member_can_invite'] ) && 
-	     ! groups_is_user_admin( $user_id, $group_id ) && 
-	     ! groups_is_user_mod( $user_id, $group_id ) ) {
-		
-		bp_core_remove_subnav_item( bp_get_current_group_slug(), 'send-invites' );
-	}
-}
-
-/**
- * 7. PAGE MODE INDICATOR - Visual indicators when Page Mode is active
+ * 4. PAGE MODE INDICATOR - Visual indicators when Page Mode is active
  */
 
 // Add indicator to activity items posted by admins/mods

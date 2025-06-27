@@ -41,7 +41,7 @@ function bp_plg_display_page_mode_settings() {
 	<fieldset class="group-create-privacy group-page-mode">
 		<legend><?php esc_html_e( 'Page Mode Settings', 'bp-page-like-groups' ); ?></legend>
 		
-		<p class="group-setting-info"><?php esc_html_e( 'Page Mode transforms your group into a Facebook Page-style community where only administrators and moderators can create posts, while all members can engage through comments and reactions.', 'bp-page-like-groups' ); ?></p>
+		<p class="group-setting-info"><?php esc_html_e( 'Page Mode transforms your group into a Facebook Page-style community where only administrators and moderators can create posts, while all members can engage through comments.', 'bp-page-like-groups' ); ?></p>
 		
 		<p class="bp-page-mode-perfect-for"><strong><?php esc_html_e( 'Perfect for:', 'bp-page-like-groups' ); ?></strong> <?php esc_html_e( 'Announcements, News Updates, Brand Communities, Official Pages', 'bp-page-like-groups' ); ?></p>
 		
@@ -73,54 +73,24 @@ function bp_plg_display_page_mode_settings() {
 				</div>
 			</div>
 			
-			<!-- Engagement Options -->
+			<!-- Member Engagement -->
 			<div class="group-setting-section">
-				<h4><?php esc_html_e( 'Engagement Options', 'bp-page-like-groups' ); ?></h4>
-				
-				<div class="checkbox">
-					<label for="settings-enable-quick-comments">
-						<input type="checkbox" name="settings[enable_quick_comments]" id="settings-enable-quick-comments" value="1" <?php checked( $settings['enable_quick_comments'], true ); ?> />
-						<?php esc_html_e( 'Enable quick reactions (Like, Love, Thanks)', 'bp-page-like-groups' ); ?>
-					</label>
-				</div>
-				
-				<div class="checkbox">
-					<label for="settings-show-engagement-stats">
-						<input type="checkbox" name="settings[show_engagement_stats]" id="settings-show-engagement-stats" value="1" <?php checked( $settings['show_engagement_stats'], true ); ?> />
-						<?php esc_html_e( 'Show view counts and engagement stats', 'bp-page-like-groups' ); ?>
-					</label>
-				</div>
+				<h4><?php esc_html_e( 'Member Engagement', 'bp-page-like-groups' ); ?></h4>
 				
 				<?php if ( $has_forum ) : ?>
 				<div class="checkbox">
 					<label for="settings-allow-member-discussions">
 						<input type="checkbox" name="settings[allow_member_discussions]" id="settings-allow-member-discussions" value="1" <?php checked( $settings['allow_member_discussions'], true ); ?> />
-						<?php esc_html_e( 'Allow members to start forum discussions', 'bp-page-like-groups' ); ?>
+						<?php esc_html_e( 'Allow members to create new forum topics', 'bp-page-like-groups' ); ?>
 					</label>
 				</div>
+				<?php else : ?>
+				<p class="description">
+					<em><?php esc_html_e( 'Note: Forum is not enabled for this group. To use forum features, please enable the forum in the group settings.', 'bp-page-like-groups' ); ?></em>
+				</p>
 				<?php endif; ?>
 			</div>
-			
-			<!-- Membership Control -->
-			<div class="group-setting-section">
-				<h4><?php esc_html_e( 'Membership Control', 'bp-page-like-groups' ); ?></h4>
-				
-				<div class="checkbox">
-					<label for="settings-join-requests-need-approval">
-						<input type="checkbox" name="settings[join_requests_need_approval]" id="settings-join-requests-need-approval" value="1" <?php checked( $settings['join_requests_need_approval'], true ); ?> />
-						<?php esc_html_e( 'Require approval for all join requests', 'bp-page-like-groups' ); ?>
-						<p class="description"><?php esc_html_e( 'Even for public groups, members must be approved to join when Page Mode is active.', 'bp-page-like-groups' ); ?></p>
-					</label>
-				</div>
-				
-				<div class="checkbox">
-					<label for="settings-member-can-invite">
-						<input type="checkbox" name="settings[member_can_invite]" id="settings-member-can-invite" value="1" <?php checked( $settings['member_can_invite'], false ); ?> />
-						<?php esc_html_e( 'Allow members to invite others', 'bp-page-like-groups' ); ?>
-						<p class="description"><?php esc_html_e( 'When disabled, only administrators and moderators can invite new members.', 'bp-page-like-groups' ); ?></p>
-					</label>
-				</div>
-			</div>
+
 			
 		</div>
 		

@@ -1,5 +1,5 @@
 /**
- * BuddyPress Page-like Groups Styles - Simplified
+ * BuddyPress Page-like Groups Styles
  * Version: 1.0.0
  */
 
@@ -194,9 +194,6 @@
     vertical-align: middle;
 }
 
-/* Removed Features Notice */
-/* Quick reactions and engagement stats features have been removed */
-
 /* Responsive design */
 @media screen and (max-width: 768px) {
     .page-mode-options-container {
@@ -223,15 +220,6 @@
 .bp-plg-admin-settings-section h3 {
     margin-bottom: 20px;
     font-size: 1.3em;
-}
-
-/* Ensure compatibility with different BuddyPress themes */
-body.bp-nouveau .bp-page-mode-settings {
-    /* Nouveau specific adjustments */
-}
-
-body.bp-legacy .bp-page-mode-settings {
-    /* Legacy specific adjustments */
 }
 
 /* Group settings form integration */

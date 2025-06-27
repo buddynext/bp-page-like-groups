@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions for BuddyPress Page-like Groups - Simplified
+ * Helper functions for BuddyPress Page-like Groups
  *
  * @package BuddyPress_Page_Like_Groups
  */
@@ -26,12 +26,7 @@ function bp_plg_is_page_mode_enabled( $group_id ) {
  */
 function bp_plg_get_page_mode_settings( $group_id ) {
 	$defaults = array(
-		'join_requests_need_approval' => true,
 		'allow_member_discussions' => true,
-		'enable_quick_comments' => false, // Removed feature - keep for compatibility
-		'show_engagement_stats' => false, // Removed feature - keep for compatibility
-		'member_can_invite' => false,
-		'post_approval_required' => false
 	);
 
 	$settings = groups_get_groupmeta( $group_id, BP_Page_Like_Groups::META_KEY_SETTINGS, true );

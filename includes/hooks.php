@@ -52,36 +52,6 @@ function bp_plg_filter_comment_reply( $can_comment, $comment ) {
 }
 
 /**
- * Add custom activity actions for page mode
- */
-add_action( 'bp_register_activity_actions', 'bp_plg_register_activity_actions' );
-function bp_plg_register_activity_actions() {
-	bp_activity_set_action(
-		'groups',
-		'page_announcement',
-		__( 'Posted an announcement', 'bp-page-like-groups' ),
-		'bp_plg_format_activity_action_page_announcement',
-		__( 'Announcements', 'bp-page-like-groups' ),
-		array( 'activity', 'group', 'member', 'member_groups' )
-	);
-}
-
-/**
- * Format page announcement activity action
- */
-function bp_plg_format_activity_action_page_announcement( $action, $activity ) {
-	$user_link = bp_core_get_userlink( $activity->user_id );
-	$group = groups_get_group( $activity->item_id );
-	$group_link = '<a href="' . bp_get_group_url( $group ) . '">' . esc_html( $group->name ) . '</a>';
-
-	return sprintf( 
-		__( '%1$s posted an announcement in the group %2$s', 'bp-page-like-groups' ), 
-		$user_link, 
-		$group_link 
-	);
-}
-
-/**
  * Filter notification settings for page mode groups
  */
 add_filter( 'bp_groups_notification_new_update_action', 'bp_plg_filter_notification_action', 10, 2 );

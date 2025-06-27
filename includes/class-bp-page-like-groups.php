@@ -49,9 +49,6 @@ class BP_Page_Like_Groups {
 	public function init() {
 		// Add hooks
 		$this->add_hooks();
-		
-		// Setup integrations
-		$this->setup_integrations();
 	}
 
 	/**
@@ -84,84 +81,6 @@ class BP_Page_Like_Groups {
 
 		// Group header badge
 		add_action( 'bp_group_header_meta', array( $this, 'add_page_mode_badge' ) );
-
-		// Member request moderation
-		add_filter( 'bp_groups_auto_accept_membership_requests', array( $this, 'maybe_moderate_join_requests' ), 10, 2 );
-	}
-
-	/**
-	 * Setup integrations with other Wbcom plugins
-	 */
-	private function setup_integrations() {
-		// Only add integration hooks if the respective plugins exist
-		
-		// Integration with BuddyPress Moderation
-		if ( class_exists( 'BP_Moderation' ) ) {
-			add_filter( 'bp_moderation_group_settings', array( $this, 'add_moderation_settings' ) );
-		}
-
-		// Integration with BuddyPress Polls  
-		if ( function_exists( 'bp_polls_init' ) ) {
-			add_filter( 'bp_polls_group_support', array( $this, 'enable_polls_for_page_groups' ), 10, 2 );
-		}
-
-		// Integration with BuddyPress Reactions
-		if ( class_exists( 'BP_Reactions' ) ) {
-			add_filter( 'bp_reactions_group_support', array( $this, 'customize_reactions_for_pages' ), 10, 2 );
-		}
-	}
-
-	/**
-	 * Add moderation settings for page mode groups
-	 */
-	public function add_moderation_settings( $settings ) {
-		$group_id = bp_get_current_group_id();
-		if ( ! $group_id || ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-			return $settings;
-		}
-
-		$settings['page_mode'] = array(
-			'auto_moderate_non_admin_posts' => true,
-			'require_approval_for_first_post' => true,
-			'flag_threshold' => 3,
-		);
-
-		return $settings;
-	}
-
-	/**
-	 * Enable polls for page mode groups (admin/mod only)
-	 */
-	public function enable_polls_for_page_groups( $enabled, $group_id ) {
-		if ( bp_plg_is_page_mode_enabled( $group_id ) ) {
-			$user_id = bp_loggedin_user_id();
-			return groups_is_user_admin( $user_id, $group_id ) || groups_is_user_mod( $user_id, $group_id );
-		}
-		return $enabled;
-	}
-
-	/**
-	 * Customize reactions for page mode
-	 */
-	public function customize_reactions_for_pages( $reactions, $group_id ) {
-		if ( ! bp_plg_is_page_mode_enabled( $group_id ) ) {
-			return $reactions;
-		}
-
-		$page_reactions = array(
-			'announce' => array(
-				'emoji' => '📢',
-				'label' => __( 'Announcement', 'bp-page-like-groups' ),
-				'admin_only' => true
-			),
-			'official' => array(
-				'emoji' => '✅', 
-				'label' => __( 'Official', 'bp-page-like-groups' ),
-				'admin_only' => true
-			)
-		);
-
-		return array_merge( $reactions, $page_reactions );
 	}
 
 	/**
@@ -320,24 +239,6 @@ class BP_Page_Like_Groups {
 	}
 
 	/**
-	 * Maybe moderate join requests for page groups
-	 */
-	public function maybe_moderate_join_requests( $auto_accept, $group ) {
-		if ( ! bp_plg_is_page_mode_enabled( $group->id ) ) {
-			return $auto_accept;
-		}
-
-		$settings = bp_plg_get_page_mode_settings( $group->id );
-		
-		// If setting is enabled, don't auto-accept
-		if ( $settings['join_requests_need_approval'] ) {
-			return false;
-		}
-
-		return $auto_accept;
-	}
-
-	/**
 	 * Enqueue scripts and styles
 	 */
 	public function enqueue_scripts() {
@@ -351,34 +252,6 @@ class BP_Page_Like_Groups {
 			array(), 
 			BP_PLG_VERSION 
 		);
-
-		// Add inline CSS for backward compatibility
-		wp_add_inline_style( 'bp-page-like-groups', '
-			/* Ensure Page Mode settings don\'t interfere with core group settings */
-			.group-settings fieldset:not(.bp-page-mode-settings) {
-				/* Preserve existing fieldset styles */
-			}
-			
-			/* Page Mode specific styles */
-			.bp-page-mode-badge {
-				display: inline-flex;
-				align-items: center;
-				gap: 5px;
-				padding: 5px 12px;
-				margin-left: 10px;
-				background: #0073aa;
-				color: #fff;
-				font-size: 12px;
-				font-weight: 600;
-				text-transform: uppercase;
-				border-radius: 3px;
-			}
-			.bp-page-mode-badge .dashicons {
-				font-size: 16px;
-				width: 16px;
-				height: 16px;
-			}
-		' );
 
 		wp_enqueue_script( 
 			'bp-page-like-groups', 

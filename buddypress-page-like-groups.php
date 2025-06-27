@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BuddyPress Page-like Groups
  * Plugin URI: https://wbcomdesigns.com/downloads/buddypress-page-like-groups/
- * Description: Transform BuddyPress groups into Facebook-style Pages where only admins/moderators can post while members can engage through comments, reactions, and discussions
+ * Description: Transform BuddyPress groups into Facebook-style Pages where only admins/moderators can post while members can engage through comments and discussions
  * Version: 1.0.0
  * Author: Wbcom Designs
  * Author URI: https://wbcomdesigns.com/
@@ -85,7 +85,6 @@ function bp_plg_init() {
 	require_once BP_PLG_PLUGIN_DIR . 'includes/class-bp-page-like-groups.php';
 	require_once BP_PLG_PLUGIN_DIR . 'includes/functions.php';
 	require_once BP_PLG_PLUGIN_DIR . 'includes/hooks.php';
-	require_once BP_PLG_PLUGIN_DIR . 'includes/ajax-handlers.php';
 	require_once BP_PLG_PLUGIN_DIR . 'includes/settings-integration.php';
 	require_once BP_PLG_PLUGIN_DIR . 'includes/feature-implementations.php';
 	
